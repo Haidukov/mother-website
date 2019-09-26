@@ -25,7 +25,7 @@
                 <a href="contacts.html" class="route-link route-link-active">Contact</a>
             </div>
             <a href="https://www.facebook.com/iryna.dochak">
-                <img class="social-icon ml-5" alt="facebook" src="https://static.wixstatic.com/media/0fdef751204647a3bbd7eaa2827ed4f9.png/v1/fill/w_25,h_25,al_c,q_80,usm_0.66_1.00_0.01/0fdef751204647a3bbd7eaa2827ed4f9.webp">
+                <img class="social-icon ml-5" alt="facebook" src="https://image.flaticon.com/icons/png/512/59/59439.png">
             </a>
         </nav>
     </header>
@@ -45,12 +45,13 @@
                     <div class="d-flex flex-column w-100">
                         <input id="name" placeholder="Name" type="text" required>
                         <input id="email" placeholder="Email" type="email" required>
-                        <input id="phone" placeholder="Phone" type="phone" required>
+                        <input id="phone" placeholder="Phone" type="tel" required>
                         <textarea id="message" placeholder="Message" required></textarea>
                     </div>
                     <div class="d-flex justify-content-center mt-1">
-                        <button class="btn btn-primary btn-block">Send</button>
+                        <button id="submit-btn" class="btn btn-primary btn-block">Send</button>
                     </div>
+                    <div id="msg" class="text-center"></div>
                 </form>
             </div>
             <div class="contact-main-photo">
@@ -77,8 +78,6 @@
 
     firebase.initializeApp(firebaseConfig);
 
-    console.log(firebase);
-
     var functions = firebase.functions();
 
     var sendMessage = functions.httpsCallable('sendEmail');
@@ -89,15 +88,46 @@
         var email = document.getElementById('email').value;
         var phone = document.getElementById('phone').value;
         var message = document.getElementById('message').value;
+        var submitBtn = document.getElementById('submit-btn');
         var form = {
             name: name,
             email: email,
             phone: phone,
             message: message
         };
-        sendMessage(form).then(function() {
-            console.log('hello');
-        });
+        var msg = document.getElementById('msg');
+
+        showSpinner();
+        sendMessage(form)
+            .then(function() {
+                hideSpinner();
+                showMessage({ text: 'You`ve successfully sent an email', variant: 'success' });
+            })
+            .catch(function() {
+                hideSpinner();
+                showMessage({ text: 'Failed to sent en email', variant: 'danger' });
+            });
+
+        function showSpinner() 
+        {
+            clearMessage();
+            submitBtn.innerHTML = `<div class="spinner-border spinner-border-sm" role="status">
+                                <span class="sr-only">Loading...</span>
+                               </div>`;
+        }
+
+        function hideSpinner() {
+            submitBtn.innerHTML = 'Send';
+        }
+
+        function showMessage(options) {
+            msg.innerText = options.text;
+            msg.classList.add(`text-${options.variant}`);
+        }
+
+        function clearMessage() {
+            msg.innerHTML = '';
+        }
     });
 </script>
 </body>
